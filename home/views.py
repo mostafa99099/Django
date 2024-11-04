@@ -4,10 +4,11 @@ from django.contrib import messages
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from .serializers import StudentSerializers, BagSerializers
-from .models import Student
+from rest_framework.renderers import JSONRenderer
+from .serializers import StudentSerializers, BagSerializers, CommentSerializers
+from .models import Student, Comment
 from commodity.views import BagView
-from .forms import SearchHomeForm
+from .forms import SearchHomeForm, CommentForm
 from commodity.models import Bag
 from django.http import HttpResponse
 
@@ -48,14 +49,35 @@ def DroductView(request):
             return render(request, "search.html", {"form": form, "results": results})
 
     list_data = Bag.objects.all()
-    bag_Serializers= BagSerializers(list_data , many=True)
+    bag_Serializers = BagSerializers(list_data , many=True)
     return render(request, "product.html", {"form": form, "list_data": list_data, 'bag_Serializers' :bag_Serializers })
 
 
 def AboutView(request):
-    context = {}
-    return render(request, "about.html", context)
+    comments = Comment.objects.using('user_db').all()
 
+    
+    form = CommentForm()
+
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.user = request.user
+                comment.save()
+                return redirect('about')
+        else:
+            return redirect('login') 
+    comments_Serializers = CommentSerializers(comments, many=True)
+    json_data = JSONRenderer().render(comments_Serializers.data)
+    json_data = json_data.decode('utf-8')
+    context = {
+        'comments': comments,
+        'form': form,
+        'comments_Serializers':json_data,
+    }
+    return render(request, "about.html", context)
 
 @api_view(["GET"])
 def Student_List(request):
