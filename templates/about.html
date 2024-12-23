@@ -1,15 +1,7 @@
 {% extends "./base.html" %} {% block content %}
 <div class="about_mostafa">
   <h2 id="titel_discount">this page discount...</h2>
-  <hr
-    python
-    manage.py
-    makemigrations
-    python
-    manage.py
-    migrate
-    --database="default"
-  />
+  <hr />
   <div>
     <img
       id="image_mostafa"
@@ -18,30 +10,18 @@
       width="300px"
     />
     <hr />
-    <p class="text-light bg-dark">
-     نظرتون درباره ی این عکسم چیه؟
-    </p>
+    <p class="text-light bg-dark">نظرتون درباره ی این عکسم چیه؟</p>
   </div>
 </div>
-
-<div>
-  <label for="txt-for-me">نظر شما در مورد من </label>
-
-  <form method="post">
+<div class="box-text">
+  <label for="txt-for-me">نظر شما: </label>
+  <form method="post" id="commentForm">
     {% csrf_token %} {{ form.as_p }}
     <button type="submit">ارسال</button>
   </form>
 </div>
-
-<div>
+<div class="box-text" id="comments-box">
   <h3>نظرات:</h3>
-    {{comments_Serializers}}
-  {% for comment in comments %}
-  <p>
-    {{ comment.text }} - <strong>{{ comment.user.username }}</strong> در {{comment.created_at }}
-  </p>
 
-  {% endfor %}
-</div>
-
+  </div>
 {% endblock content %}
